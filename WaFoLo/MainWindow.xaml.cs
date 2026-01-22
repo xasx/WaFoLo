@@ -498,7 +498,7 @@ namespace WaFoLo
         private void LogActivity(string message)
         {
             _viewModel.AppendActivityLog(message);
-            Dispatcher.BeginInvoke(() => ActivityLogTextBox.ScrollToEnd());
+            Dispatcher.BeginInvoke(() => ActivityLogTextBox.ScrollToEnd(), System.Windows.Threading.DispatcherPriority.Background);
             _fileLogger.LogMessage(message);
         }
 
