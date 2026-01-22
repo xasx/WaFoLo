@@ -1,0 +1,18 @@
+{
+  "logFilePath": "C:\\logs\\application.log",
+  "triggerLinePattern": "Starting critical operation",
+  "expectedLinePattern": "Operation completed successfully",
+  "timeoutSeconds": 30,
+  "testMode": true,
+  "showConfigurationOnStartup": false,
+  "logTimestampFormat": "yyyy-MM-dd HH:mm:ss",
+  "monitoredProcessName": "explorer",
+  "waitForMonitoredProcess": true,
+  "processCheckIntervalSeconds": 5,
+  "AutoCloseOnSuccess": true,
+  "AutoCloseDelaySeconds": 10,
+  "RestartProcessOnTimeout": false,
+  "RestartProcessDelaySeconds": 15,
+  "MaxRestartAttempts": 1,
+  "ProcessRestartCommand": "C:\\Windows\\explorer.exe"
+}
