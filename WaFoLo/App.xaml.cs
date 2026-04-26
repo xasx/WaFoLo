@@ -28,6 +28,8 @@ namespace WaFoLo
             services.AddSingleton<IConfigurationService, ConfigurationService>();
             services.AddSingleton<ITimestampParserFactory, TimestampParserFactory>();
             services.AddSingleton<IFileLoggerService, FileLoggerService>();
+            services.AddSingleton<IWatchdogTimerFactory, DispatcherTimerFactory>();
+            services.AddSingleton<IDialogService, WpfDialogService>();
 
             // Register main window
             services.AddTransient<MainWindow>();

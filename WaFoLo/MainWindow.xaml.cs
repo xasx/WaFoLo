@@ -32,7 +32,9 @@ namespace WaFoLo
             ILogMonitorServiceFactory logMonitorServiceFactory,
             IProcessDetectionService processDetection,
             IRebootService rebootService,
-            IFileLoggerService fileLogger)
+            IFileLoggerService fileLogger,
+            IWatchdogTimerFactory timerFactory,
+            IDialogService dialogService)
         {
             InitializeComponent();
 
@@ -41,10 +43,10 @@ namespace WaFoLo
             _applicationStartTime = DateTime.Now;
 
             _orchestrator = new WatchdogOrchestrator(logMonitorServiceFactory, timestampParserFactory);
-            _timeoutManager = new TimeoutManager();
-            _processMonitor = new ProcessMonitor(processDetection, _applicationStartTime);
-            _rebootManager = new RebootManager(rebootService);
-            _autoCloseManager = new AutoCloseManager();
+            _timeoutManager = new TimeoutManager(timerFactory);
+            _processMonitor = new ProcessMonitor(processDetection, _applicationStartTime, timerFactory);
+            _rebootManager = new RebootManager(rebootService, dialogService);
+            _autoCloseManager = new AutoCloseManager(timerFactory);
             _viewModel = new MainWindowViewModel();
 
             DataContext = _viewModel;

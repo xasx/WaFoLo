@@ -1,10 +1,9 @@
-using System.Windows.Threading;
-
 namespace WaFoLo.Services
 {
     public class AutoCloseManager : IDisposable
     {
-        private DispatcherTimer? _autoCloseTimer;
+        private readonly IWatchdogTimerFactory _timerFactory;
+        private IWatchdogTimer? _autoCloseTimer;
         private int _autoCloseCountdown;
 
         public event EventHandler<string>? LogActivity;
@@ -13,15 +12,18 @@ namespace WaFoLo.Services
 
         public bool IsActive => _autoCloseTimer != null && _autoCloseTimer.IsEnabled;
 
+        public AutoCloseManager(IWatchdogTimerFactory timerFactory)
+        {
+            _timerFactory = timerFactory ?? throw new ArgumentNullException(nameof(timerFactory));
+        }
+
         public void StartCountdown(int delaySeconds)
         {
             _autoCloseCountdown = delaySeconds;
             LogActivity?.Invoke(this, $"Application will automatically close in {_autoCloseCountdown} seconds...");
 
-            _autoCloseTimer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromSeconds(1)
-            };
+            _autoCloseTimer = _timerFactory.CreateTimer();
+            _autoCloseTimer.Interval = TimeSpan.FromSeconds(1);
             _autoCloseTimer.Tick += OnAutoCloseTimerTick;
             _autoCloseTimer.Start();
 

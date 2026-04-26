@@ -1,18 +1,18 @@
-using System.Windows;
-
 namespace WaFoLo.Services
 {
     public class RebootManager
     {
         private readonly IRebootService _rebootService;
+        private readonly IDialogService _dialogService;
 
         public event EventHandler<string>? LogActivity;
         public event EventHandler? RebootInitiated;
         public event EventHandler? RebootAborted;
 
-        public RebootManager(IRebootService rebootService)
+        public RebootManager(IRebootService rebootService, IDialogService dialogService)
         {
             _rebootService = rebootService ?? throw new ArgumentNullException(nameof(rebootService));
+            _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
         }
 
         public bool HandleTimeout(bool testMode, DateTime? triggerTime, int timeoutSeconds)
@@ -20,11 +20,9 @@ namespace WaFoLo.Services
             if (testMode)
             {
                 LogActivity?.Invoke(this, "TEST MODE: Reboot would be triggered now.");
-                MessageBox.Show(
+                _dialogService.ShowWarning(
                     $"TIMEOUT OCCURRED!\n\nTrigger time: {triggerTime:yyyy-MM-dd HH:mm:ss}\nTimeout: {timeoutSeconds} seconds\n\nIn production mode, the system would reboot now.",
-                    "Test Mode - Reboot Triggered",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
+                    "Test Mode - Reboot Triggered");
                 return true;
             }
             else
@@ -58,19 +56,15 @@ namespace WaFoLo.Services
                 if (!_rebootService.HasAdministratorPrivileges())
                 {
                     LogActivity?.Invoke(this, "Note: Administrator privileges are required.");
-                    MessageBox.Show(
+                    _dialogService.ShowError(
                         $"Failed to initiate reboot: {ex.Message}\n\nThis application requires administrator privileges.",
-                        "Reboot Error",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Error);
+                        "Reboot Error");
                 }
                 else
                 {
-                    MessageBox.Show(
+                    _dialogService.ShowError(
                         $"Failed to initiate reboot: {ex.Message}",
-                        "Reboot Error",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Error);
+                        "Reboot Error");
                 }
                 return false;
             }
@@ -87,11 +81,9 @@ namespace WaFoLo.Services
                     LogActivity?.Invoke(this, "Shutdown aborted by user.");
                     RebootAborted?.Invoke(this, EventArgs.Empty);
 
-                    MessageBox.Show(
+                    _dialogService.ShowInfo(
                         "Shutdown has been cancelled.",
-                        "Shutdown Aborted",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Information);
+                        "Shutdown Aborted");
                     return true;
                 }
                 else
@@ -102,14 +94,11 @@ namespace WaFoLo.Services
             catch (Exception ex)
             {
                 LogActivity?.Invoke(this, $"Failed to abort shutdown: {ex.Message}");
-                MessageBox.Show(
+                _dialogService.ShowError(
                     $"Failed to abort shutdown: {ex.Message}",
-                    "Error",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                    "Error");
                 return false;
             }
         }
     }
 }
-

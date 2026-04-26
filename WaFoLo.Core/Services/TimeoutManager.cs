@@ -1,11 +1,10 @@
-using System.Windows.Threading;
-
 namespace WaFoLo.Services
 {
     public class TimeoutManager : IDisposable
     {
-        private DispatcherTimer? _timeoutTimer;
-        private DispatcherTimer? _progressTimer;
+        private readonly IWatchdogTimerFactory _timerFactory;
+        private IWatchdogTimer? _timeoutTimer;
+        private IWatchdogTimer? _progressTimer;
         private DateTime? _triggerTime;
         private int _timeoutSeconds;
 
@@ -16,18 +15,16 @@ namespace WaFoLo.Services
         public DateTime? TriggerTime => _triggerTime;
         public bool IsActive => _triggerTime.HasValue;
 
-        public TimeoutManager()
+        public TimeoutManager(IWatchdogTimerFactory timerFactory)
         {
-            _timeoutTimer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromSeconds(1)
-            };
+            _timerFactory = timerFactory ?? throw new ArgumentNullException(nameof(timerFactory));
+
+            _timeoutTimer = _timerFactory.CreateTimer();
+            _timeoutTimer.Interval = TimeSpan.FromSeconds(1);
             _timeoutTimer.Tick += OnTimeoutTimerTick;
 
-            _progressTimer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromMilliseconds(100)
-            };
+            _progressTimer = _timerFactory.CreateTimer();
+            _progressTimer.Interval = TimeSpan.FromMilliseconds(100);
             _progressTimer.Tick += OnProgressTimerTick;
         }
 

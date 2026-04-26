@@ -1,12 +1,11 @@
-using System.Windows.Threading;
-
 namespace WaFoLo.Services
 {
     public class ProcessMonitor : IDisposable
     {
         private readonly IProcessDetectionService _processDetection;
+        private readonly IWatchdogTimerFactory _timerFactory;
         private readonly DateTime _applicationStartTime;
-        private DispatcherTimer? _processCheckTimer;
+        private IWatchdogTimer? _processCheckTimer;
         private string? _monitoredProcessName;
         private bool _isWaitingForProcess;
 
@@ -16,9 +15,10 @@ namespace WaFoLo.Services
 
         public DateTime? MonitoredProcessStartTime { get; private set; }
 
-        public ProcessMonitor(IProcessDetectionService processDetection, DateTime applicationStartTime)
+        public ProcessMonitor(IProcessDetectionService processDetection, DateTime applicationStartTime, IWatchdogTimerFactory timerFactory)
         {
             _processDetection = processDetection ?? throw new ArgumentNullException(nameof(processDetection));
+            _timerFactory = timerFactory ?? throw new ArgumentNullException(nameof(timerFactory));
             _applicationStartTime = applicationStartTime;
         }
 
@@ -72,10 +72,8 @@ namespace WaFoLo.Services
             LogActivity?.Invoke(this, $"Waiting for monitored process '{processName}' to start...");
             LogActivity?.Invoke(this, $"Process check interval: {checkIntervalSeconds} seconds");
 
-            _processCheckTimer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromSeconds(checkIntervalSeconds)
-            };
+            _processCheckTimer = _timerFactory.CreateTimer();
+            _processCheckTimer.Interval = TimeSpan.FromSeconds(checkIntervalSeconds);
             _processCheckTimer.Tick += OnProcessCheckTimerTick;
             _processCheckTimer.Start();
         }
