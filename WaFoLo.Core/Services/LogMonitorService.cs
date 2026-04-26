@@ -9,7 +9,6 @@ namespace WaFoLo.Services
     /// </summary>
     public class LogMonitorService : ILogMonitorService
     {
-        private FileSystemWatcher? _fileWatcher;
         private StreamReader? _streamReader;
         private FileStream? _fileStream;
         private long _lastPosition;
@@ -21,7 +20,7 @@ namespace WaFoLo.Services
         public event EventHandler<string>? NewLogLine;
         public event EventHandler<string>? DiagnosticLog;
 
-        public bool IsMonitoring => _fileWatcher?.EnableRaisingEvents == true;
+        public bool IsMonitoring => _pollingTimer != null;
 
         /// <summary>
         /// Start monitoring a log file for changes using polling.

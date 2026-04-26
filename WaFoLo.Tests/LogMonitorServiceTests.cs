@@ -127,6 +127,30 @@ namespace WaFoLo.Tests
             Assert.False(service.IsMonitoring);
         }
 
+        [Fact]
+        public void IsMonitoring_AfterStartMonitoringExistingFile_ReturnsTrue()
+        {
+            string logFile = Path.Combine(_tempDir, "app.log");
+            File.WriteAllText(logFile, "content");
+
+            using var service = new LogMonitorService();
+            service.StartMonitoring(logFile);
+
+            Assert.True(service.IsMonitoring);
+        }
+
+        [Fact]
+        public void IsMonitoring_AfterStartMonitoringNonExistentFile_ReturnsTrue()
+        {
+            // Monitoring begins even before the file exists (polling waits for it)
+            string logFile = Path.Combine(_tempDir, "future.log");
+
+            using var service = new LogMonitorService();
+            service.StartMonitoring(logFile);
+
+            Assert.True(service.IsMonitoring);
+        }
+
         // ── StartMonitoring: non-existent file ────────────────────────────────
 
         [Fact]
