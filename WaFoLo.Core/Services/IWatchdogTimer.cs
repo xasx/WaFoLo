@@ -8,7 +8,7 @@ namespace WaFoLo.Services
     {
         TimeSpan Interval { get; set; }
         bool IsEnabled { get; }
-        event EventHandler Tick;
+        event EventHandler? Tick;
         void Start();
         void Stop();
     }
